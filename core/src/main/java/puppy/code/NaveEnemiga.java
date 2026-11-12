@@ -67,13 +67,21 @@ public abstract class NaveEnemiga implements Colisionable {
         return estrategiaDisparo.crearDisparos(getCentroX(), getCentroY(), objetivoX, objetivoY, rapidezProyectil, txBala, false);
     }
 
-    public boolean recibirImpacto(int dano) {
-        if (estaDestruido() || dano <= 0) {
+    public final boolean recibirImpacto(int dano) {
+        if (!puedeRecibirImpacto(dano)) {
             return false;
         }
-        puntosVida = Math.max(0, puntosVida - dano);
+        aplicarDano(dano);
         alRecibirImpacto();
         return estaDestruido();
+    }
+
+    private boolean puedeRecibirImpacto(int dano) {
+        return !estaDestruido() && dano > 0;
+    }
+
+    private void aplicarDano(int dano) {
+        puntosVida = Math.max(0, puntosVida - dano);
     }
 
     public void checkCollision(NaveEnemiga otra) {
@@ -146,7 +154,9 @@ public abstract class NaveEnemiga implements Colisionable {
 
     public abstract int getPuntajeRecompensa();
     public abstract String getNombreTipo();
-    protected abstract void alRecibirImpacto();
+    protected void alRecibirImpacto() {
+        // Hook opcional para reacciones propias de cada tipo de nave.
+    }
 
     public int getXSpeed() {
         return xSpeed;
