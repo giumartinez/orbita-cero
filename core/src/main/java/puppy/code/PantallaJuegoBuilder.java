@@ -41,7 +41,7 @@ public final class PantallaJuegoBuilder implements ConstructorPantallaJuego {
         Viewport viewport = new FitViewport(AreaJuego.ANCHO, AreaJuego.ALTO, camera);
         viewport.update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
         Nave4 nave = new Nave4(400 - 22, 30, recursos.getTexturaNave(),
-            recursos.getSonidoHerido(), recursos.getTexturaBala(), recursos.getSonidoDisparo(),
+            recursos.getTexturaBala(), new SonidosNaveLibGdx(recursos.getSonidoDisparo(), recursos.getSonidoHerido()),
             vidas, new ControlesTecladoNave(viewport), ronda >= 3 ? new DisparoTriple() : new DisparoSimple());
         ArrayList<NaveEnemiga> enemigos = new ArrayList<>();
         for (int i = 0; i < cantidadEnemigos; i++) {

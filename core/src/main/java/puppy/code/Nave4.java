@@ -1,9 +1,6 @@
 package puppy.code;
 
 import java.util.List;
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
-import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -19,17 +16,15 @@ public class Nave4 implements Colisionable {
     private static final float RAPIDEZ_BALA = 640f;
     private float tiempoDisparo;
     private Sprite spr;
-    private Sound sonidoHerido;
-    private Sound soundBala;
+    private final SonidosNave sonidos;
     private Texture txBala;
     private EstrategiaDisparo estrategiaDisparo;
 
-    public Nave4(int x, int y, Texture tx, Sound soundChoque, Texture txBala, Sound soundBala, int vidasIniciales, ControlesNave controles, EstrategiaDisparo estrategiaDisparo) {
+    public Nave4(int x, int y, Texture tx, Texture txBala, SonidosNave sonidos, int vidasIniciales, ControlesNave controles, EstrategiaDisparo estrategiaDisparo) {
         health = new Health(vidasIniciales);
         this.controles = controles;
         this.estrategiaDisparo = estrategiaDisparo;
-        sonidoHerido = soundChoque;
-        this.soundBala = soundBala;
+        this.sonidos = java.util.Objects.requireNonNull(sonidos);
         this.txBala = txBala;
         spr = new Sprite(tx);
         spr.setPosition(x, y);
@@ -56,7 +51,7 @@ public class Nave4 implements Colisionable {
             for (Bullet bala : disparos) {
                 receptor.agregarBala(bala);
             }
-            soundBala.play();
+            sonidos.alDisparar();
             tiempoDisparo = INTERVALO_DISPARO;
         }
     }
@@ -75,7 +70,7 @@ public class Nave4 implements Colisionable {
             return false;
         }
         enemigo.rebotarContraJugador();
-        sonidoHerido.play();
+        sonidos.alRecibirDano();
         return true;
     }
 
@@ -87,7 +82,7 @@ public class Nave4 implements Colisionable {
         if (!health.hit()) {
             return false;
         }
-        sonidoHerido.play();
+        sonidos.alRecibirDano();
         return true;
     }
 
