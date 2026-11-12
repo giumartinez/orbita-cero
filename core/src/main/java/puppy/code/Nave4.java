@@ -24,10 +24,10 @@ public class Nave4 implements Colisionable {
     private Texture txBala;
     private EstrategiaDisparo estrategiaDisparo;
 
-    public Nave4(int x, int y, Texture tx, Sound soundChoque, Texture txBala, Sound soundBala, int vidasIniciales, ControlesNave controles) {
+    public Nave4(int x, int y, Texture tx, Sound soundChoque, Texture txBala, Sound soundBala, int vidasIniciales, ControlesNave controles, EstrategiaDisparo estrategiaDisparo) {
         health = new Health(vidasIniciales);
         this.controles = controles;
-        this.estrategiaDisparo = new DisparoSimple();
+        this.estrategiaDisparo = estrategiaDisparo;
         sonidoHerido = soundChoque;
         this.soundBala = soundBala;
         this.txBala = txBala;
@@ -37,7 +37,7 @@ public class Nave4 implements Colisionable {
         spr.setOriginCenter();
     }
 
-    public void update(float delta, PantallaJuego juego) {
+    public void update(float delta, ReceptorBalas receptor) {
         EntradaNave entrada = controles.leer();
         tiempoDisparo = Math.max(0, tiempoDisparo - delta);
         Vector2 posicion = MovimientoNave.posicionSiguiente(spr.getX(), spr.getY(), entrada.horizontal(), entrada.vertical(), delta, spr.getWidth(), spr.getHeight());
@@ -54,7 +54,7 @@ public class Nave4 implements Colisionable {
                 return;
             }
             for (Bullet bala : disparos) {
-                juego.agregarBala(bala);
+                receptor.agregarBala(bala);
             }
             soundBala.play();
             tiempoDisparo = INTERVALO_DISPARO;

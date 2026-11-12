@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
+import java.util.List;
 
 public class Bullet implements Colisionable {
     private float xSpeed;
@@ -72,5 +73,14 @@ public class Bullet implements Colisionable {
 
     public boolean esOrigenJugador() {
         return origenJugador;
+    }
+
+    public NaveEnemiga procesarColision(Nave4 nave, List<NaveEnemiga> enemigos) {
+        for (NaveEnemiga enemigo : enemigos) {
+            if (checkCollision(enemigo)) {
+                return enemigo;
+            }
+        }
+        return null;
     }
 }

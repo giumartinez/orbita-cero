@@ -14,7 +14,7 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import puppy.code.input.ControlesTecladoNave;
 
-public class PantallaJuego implements Screen {
+public class PantallaJuego implements Screen, ReceptorBalas {
     private SpaceNavigation game;
     private OrthographicCamera camera;
     private Viewport viewport;
@@ -29,7 +29,7 @@ public class PantallaJuego implements Screen {
     private ArrayList<NaveEnemiga> enemigos = new ArrayList<>();
     private ArrayList<Bullet> balas = new ArrayList<>();
 
-    public PantallaJuego(SpaceNavigation game, int ronda, int vidas, int score, int velXEnemigos, int velYEnemigos, int cantidadEnemigos) {
+    public PantallaJuego(SpaceNavigation game, int ronda, int vidas, int score, int velXEnemigos, int velYEnemigos, int cantidadEnemigos, FabricaEnemigos fabricaEnemigos) {
     
         this.game = game;
         this.ronda = ronda;
@@ -48,10 +48,7 @@ public class PantallaJuego implements Screen {
         
         
 
-        nave = new Nave4(400 - 22,30,recursos.getTexturaNave(),recursos.getSonidoHerido(),recursos.getTexturaBala(),recursos.getSonidoDisparo(),vidas,new ControlesTecladoNave(viewport));
-        if (ronda >= 3) {
-            nave.setEstrategiaDisparo(new DisparoTriple());
-        }
+        nave = new Nave4(400 - 22,30,recursos.getTexturaNave(),recursos.getSonidoHerido(),recursos.getTexturaBala(),recursos.getSonidoDisparo(),vidas,new ControlesTecladoNave(viewport), ronda >= 3 ? new DisparoTriple() : new DisparoSimple());
         
         Random r = new Random();
         for (int i = 0; i < cantidadEnemigos; i++) {
@@ -59,13 +56,7 @@ public class PantallaJuego implements Screen {
             int posY = 160 + r.nextInt(AreaJuego.ALTO - 220);
             int velX = velXEnemigos + r.nextInt(3);
             int velY = velYEnemigos + r.nextInt(3);
-            if (i % 3 == 0) {
-               enemigos.add(new NaveArtillera(posX,posY,velX,velY,recursos.getTexturaNaveArtillera()));
-      
-            } else {
-            	enemigos.add(new NaveCaza(posX,posY,velX,velY,recursos.getTexturaNaveCaza()));
-       
-            }
+            enemigos.add(fabricaEnemigos.crear(i, posX, posY, velX, velY));
         }
     }
 
@@ -92,21 +83,13 @@ public class PantallaJuego implements Screen {
         for (int i = 0; i < balas.size(); i++) {
             Bullet b = balas.get(i);
             b.update(paso);
-            if (b.esOrigenJugador()) {
-                for (int j = 0; j < enemigos.size(); j++) {
-                    NaveEnemiga enemigo = enemigos.get(j);
-                    if (b.checkCollision(enemigo)) {
-                        recursos.getSonidoExplosion().play();
-                        if (enemigo.recibirImpacto(1)) {
-                            score += enemigo.getPuntajeRecompensa();
-                            enemigos.remove(j);
-                            j--;
-                        }
-                        break;
-                    }
+            NaveEnemiga impactado = b.procesarColision(nave, enemigos);
+            if (impactado != null) {
+                recursos.getSonidoExplosion().play();
+                if (impactado.recibirImpacto(1)) {
+                    score += impactado.getPuntajeRecompensa();
+                    enemigos.remove(impactado);
                 }
-            } else {
-                nave.checkCollisionBalaEnemiga(b);
             }
             if (b.isDestroyed()) {
                 balas.remove(i);
@@ -114,7 +97,7 @@ public class PantallaJuego implements Screen {
             }
         }
         for (NaveEnemiga enemigo : enemigos) {
-            enemigo.update(paso, nave.getCentroX(), nave.getCentroY(), recursos.getTexturaBala(), balas);
+            balas.addAll(enemigo.update(paso, nave.getCentroX(), nave.getCentroY(), recursos.getTexturaBala()));
         }
         for (int i = 0; i < enemigos.size(); i++) {
             NaveEnemiga e1 = enemigos.get(i);
@@ -165,8 +148,9 @@ public class PantallaJuego implements Screen {
         }
     }
 
-    public boolean agregarBala(Bullet bb) {
-        return balas.add(bb);
+    @Override
+    public void agregarBala(Bullet bb) {
+        balas.add(bb);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package puppy.code;
 
 import java.util.List;
+import java.util.Collections;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -36,9 +37,9 @@ public abstract class NaveEnemiga implements Colisionable {
         this.spr.setPosition(this.x, this.y);
     }
 
-    public void update(float delta, float objetivoX, float objetivoY, Texture txBala, List<Bullet> balasEnJuego) {
+    public List<Bullet> update(float delta, float objetivoX, float objetivoY, Texture txBala) {
         if (estaDestruido()) {
-            return;
+            return Collections.emptyList();
         }
         float paso = Math.min(delta, 0.05f) * 60f;
         x += xSpeed * paso;
@@ -55,9 +56,11 @@ public abstract class NaveEnemiga implements Colisionable {
         spr.setRotation(DireccionDisparo.anguloNave(getCentroX(), getCentroY(), objetivoX, objetivoY));
         tiempoDisparo = Math.max(0f, tiempoDisparo - delta);
         if (tiempoDisparo == 0f) {
-            balasEnJuego.addAll(dispararHacia(objetivoX, objetivoY, txBala));
+            List<Bullet> disparos = dispararHacia(objetivoX, objetivoY, txBala);
             tiempoDisparo = intervaloDisparo;
+            return disparos;
         }
+        return Collections.emptyList();
     }
 
     public List<Bullet> dispararHacia(float objetivoX, float objetivoY, Texture txBala) {
@@ -82,26 +85,31 @@ public abstract class NaveEnemiga implements Colisionable {
         }
         Vector2[] separaciones = ColisionAsteroides.separaciones(a, b, AreaJuego.ANCHO, AreaJuego.ALTO);
         if (desplazamiento.x != 0) {
-            x += separaciones[0].x;
-            otra.x += separaciones[1].x;
             float direccion = Math.signum(desplazamiento.x);
-            int[] velocidades = ColisionAsteroides.velocidadesTrasChoque(xSpeed, otra.xSpeed, direccion);
-            xSpeed = velocidades[0];
-            otra.xSpeed = velocidades[1];
+            int velocidadPropia = xSpeed;
+            int velocidadOtra = otra.getXSpeed();
+            aplicarChoque(separaciones[0], true, velocidadOtra, direccion);
+            otra.aplicarChoque(separaciones[1], true, velocidadPropia, -direccion);
         } else {
-            y += separaciones[0].y;
-            otra.y += separaciones[1].y;
             float direccion = Math.signum(desplazamiento.y);
-            int[] velocidades = ColisionAsteroides.velocidadesTrasChoque(ySpeed, otra.ySpeed, direccion);
-            ySpeed = velocidades[0];
-            otra.ySpeed = velocidades[1];
+            int velocidadPropia = ySpeed;
+            int velocidadOtra = otra.getySpeed();
+            aplicarChoque(separaciones[0], false, velocidadOtra, direccion);
+            otra.aplicarChoque(separaciones[1], false, velocidadPropia, -direccion);
+        }
+    }
+
+    private void aplicarChoque(Vector2 separacion, boolean horizontal, int velocidadOtra, float direccion) {
+        x += separacion.x;
+        y += separacion.y;
+        if (horizontal) {
+            xSpeed = ColisionAsteroides.velocidadesTrasChoque(xSpeed, velocidadOtra, direccion)[0];
+        } else {
+            ySpeed = ColisionAsteroides.velocidadesTrasChoque(ySpeed, velocidadOtra, direccion)[0];
         }
         x = MathUtils.clamp(x, 0, AreaJuego.ANCHO - spr.getWidth());
         y = MathUtils.clamp(y, 0, AreaJuego.ALTO - spr.getHeight());
-        otra.x = MathUtils.clamp(otra.x, 0, AreaJuego.ANCHO - otra.spr.getWidth());
-        otra.y = MathUtils.clamp(otra.y, 0, AreaJuego.ALTO - otra.spr.getHeight());
         spr.setPosition(x, y);
-        otra.spr.setPosition(otra.x, otra.y);
     }
 
     public void draw(SpriteBatch batch) {

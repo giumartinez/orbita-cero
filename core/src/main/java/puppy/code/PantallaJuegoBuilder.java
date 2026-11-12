@@ -58,7 +58,8 @@ public class PantallaJuegoBuilder {
                 score,
                 velXEnemigos,
                 velYEnemigos,
-                cantidadEnemigos
+                cantidadEnemigos,
+                new FabricaEnemigosRonda(GestorRecursos.getInstancia())
         );
     }
 }
