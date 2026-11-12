@@ -8,5 +8,4 @@ public interface EstrategiaDisparo {
 
     List<Bullet> crearDisparos(float origenX, float origenY, float objetivoX, float objetivoY, float rapidezBala, Texture txBala, boolean origenJugador);
 
-    String getNombreEstrategia();
 }

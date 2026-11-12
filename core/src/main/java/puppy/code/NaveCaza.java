@@ -17,9 +17,4 @@ public class NaveCaza extends NaveEnemiga {
     public String getNombreTipo() {
         return "Nave Caza";
     }
-
-    @Override
-    protected void alRecibirImpacto() {
-        // se destruye al primer imapcto
-    }
 }

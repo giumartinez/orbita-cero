@@ -16,14 +16,9 @@ public class DisparoSimple implements EstrategiaDisparo {
             return disparos;
         }
         
-        disparos.add(new Bullet(origenX, origenY, velocidad.x, velocidad.y, txBala, origenJugador));
+        disparos.add(origenJugador ? new Bullet(origenX, origenY, velocidad.x, velocidad.y, txBala) : new BalaEnemiga(origenX, origenY, velocidad.x, velocidad.y, txBala));
 
         return disparos;
     }
 
-    @Override
-    public String getNombreEstrategia() {
-        return "Disparo Simple";
-    }
-    
 }

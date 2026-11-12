@@ -1,9 +1,6 @@
 package puppy.code;
 
 import java.util.List;
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
-import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -19,17 +16,15 @@ public class Nave4 implements Colisionable {
     private static final float RAPIDEZ_BALA = 640f;
     private float tiempoDisparo;
     private Sprite spr;
-    private Sound sonidoHerido;
-    private Sound soundBala;
+    private final SonidosNave sonidos;
     private Texture txBala;
     private EstrategiaDisparo estrategiaDisparo;
 
-    public Nave4(int x, int y, Texture tx, Sound soundChoque, Texture txBala, Sound soundBala, int vidasIniciales, ControlesNave controles) {
+    public Nave4(int x, int y, Texture tx, Texture txBala, SonidosNave sonidos, int vidasIniciales, ControlesNave controles, EstrategiaDisparo estrategiaDisparo) {
         health = new Health(vidasIniciales);
         this.controles = controles;
-        this.estrategiaDisparo = new DisparoSimple();
-        sonidoHerido = soundChoque;
-        this.soundBala = soundBala;
+        this.estrategiaDisparo = estrategiaDisparo;
+        this.sonidos = java.util.Objects.requireNonNull(sonidos);
         this.txBala = txBala;
         spr = new Sprite(tx);
         spr.setPosition(x, y);
@@ -37,7 +32,7 @@ public class Nave4 implements Colisionable {
         spr.setOriginCenter();
     }
 
-    public void update(float delta, PantallaJuego juego) {
+    public void update(float delta, ReceptorBalas receptor) {
         EntradaNave entrada = controles.leer();
         tiempoDisparo = Math.max(0, tiempoDisparo - delta);
         Vector2 posicion = MovimientoNave.posicionSiguiente(spr.getX(), spr.getY(), entrada.horizontal(), entrada.vertical(), delta, spr.getWidth(), spr.getHeight());
@@ -54,9 +49,9 @@ public class Nave4 implements Colisionable {
                 return;
             }
             for (Bullet bala : disparos) {
-                juego.agregarBala(bala);
+                receptor.agregarBala(bala);
             }
-            soundBala.play();
+            sonidos.alDisparar();
             tiempoDisparo = INTERVALO_DISPARO;
         }
     }
@@ -74,9 +69,8 @@ public class Nave4 implements Colisionable {
         if (!this.colisionaCon(enemigo) || !health.hit()) {
             return false;
         }
-        enemigo.setXSpeed(-enemigo.getXSpeed());
-        enemigo.setySpeed(-enemigo.getySpeed());
-        sonidoHerido.play();
+        enemigo.rebotarContraJugador();
+        sonidos.alRecibirDano();
         return true;
     }
 
@@ -88,7 +82,7 @@ public class Nave4 implements Colisionable {
         if (!health.hit()) {
             return false;
         }
-        sonidoHerido.play();
+        sonidos.alRecibirDano();
         return true;
     }
 

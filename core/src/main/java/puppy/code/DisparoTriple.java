@@ -30,22 +30,21 @@ public class DisparoTriple implements EstrategiaDisparo {
         }
         
         //disparo central
-        disparos.add(new Bullet(origenX, origenY, velocidadCentral.x, velocidadCentral.y, txBala, origenJugador));
+        disparos.add(crearBala(origenX, origenY, velocidadCentral.x, velocidadCentral.y, txBala, origenJugador));
         
         //disparo izquierdo
         Vector2 velocidadIzquierda = velocidadCentral.cpy().rotateDeg(-anguloDispersion);
-        disparos.add(new Bullet(origenX, origenY, velocidadIzquierda.x, velocidadIzquierda.y, txBala, origenJugador));
+        disparos.add(crearBala(origenX, origenY, velocidadIzquierda.x, velocidadIzquierda.y, txBala, origenJugador));
         
         //disparo derecho
         Vector2 velocidadDerecha = velocidadCentral.cpy().rotateDeg(anguloDispersion);
-        disparos.add(new Bullet(origenX, origenY, velocidadDerecha.x, velocidadDerecha.y, txBala, origenJugador));
+        disparos.add(crearBala(origenX, origenY, velocidadDerecha.x, velocidadDerecha.y, txBala, origenJugador));
 
         return disparos;
     }
 
-    @Override
-    public String getNombreEstrategia() {
-        return "Triple";
+    private Bullet crearBala(float x, float y, float vx, float vy, Texture textura, boolean origenJugador) {
+        return origenJugador ? new Bullet(x, y, vx, vy, textura) : new BalaEnemiga(x, y, vx, vy, textura);
     }
 
     public float getAnguloDispersion() {

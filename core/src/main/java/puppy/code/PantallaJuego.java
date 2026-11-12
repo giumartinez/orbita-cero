@@ -1,6 +1,8 @@
 package puppy.code;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Random;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
@@ -14,7 +16,7 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import puppy.code.input.ControlesTecladoNave;
 
-public class PantallaJuego implements Screen {
+public class PantallaJuego implements Screen, ReceptorBalas {
     private SpaceNavigation game;
     private OrthographicCamera camera;
     private Viewport viewport;
@@ -29,48 +31,20 @@ public class PantallaJuego implements Screen {
     private ArrayList<NaveEnemiga> enemigos = new ArrayList<>();
     private ArrayList<Bullet> balas = new ArrayList<>();
 
-    public PantallaJuego(SpaceNavigation game, int ronda, int vidas, int score, int velXEnemigos, int velYEnemigos, int cantidadEnemigos) {
-    
-        this.game = game;
-        this.ronda = ronda;
-        this.score = score;
-        
-   		this.velXEnemigos = velXEnemigos;
-		this.velYEnemigos = velYEnemigos;
-		this.cantidadEnemigos = cantidadEnemigos;
-		
-		recursos = GestorRecursos.getInstancia();
-		
-        batch = game.getBatch();
-        camera = new OrthographicCamera();
-        viewport = new FitViewport(AreaJuego.ANCHO, AreaJuego.ALTO, camera);
-        viewport.update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
-        
-        
-
-        nave = new Nave4(400 - 22,30,recursos.getTexturaNave(),recursos.getSonidoHerido(),recursos.getTexturaBala(),recursos.getSonidoDisparo(),vidas,new ControlesTecladoNave(viewport));
-        if (ronda >= 3) {
-            nave.setEstrategiaDisparo(new DisparoTriple());
-        }
-        
-        Random r = new Random();
-        for (int i = 0; i < cantidadEnemigos; i++) {
-            int posX = r.nextInt(AreaJuego.ANCHO - 60);
-            int posY = 160 + r.nextInt(AreaJuego.ALTO - 220);
-            int velX = velXEnemigos + r.nextInt(3);
-            int velY = velYEnemigos + r.nextInt(3);
-            if (i % 3 == 0) {
-               enemigos.add(new NaveArtillera(posX,posY,velX,velY,recursos.getTexturaNaveArtillera()));
-      
-            } else {
-            	enemigos.add(new NaveCaza(posX,posY,velX,velY,recursos.getTexturaNaveCaza()));
-       
-            }
-        }
+    PantallaJuego(RondaConstruida estado) {
+        this.game = java.util.Objects.requireNonNull(estado).game();
+        this.ronda = estado.ronda();
+        this.score = estado.score();
+        this.velXEnemigos = estado.velXEnemigos();
+        this.velYEnemigos = estado.velYEnemigos();
+        this.cantidadEnemigos = estado.cantidadEnemigos();
+        this.recursos = estado.recursos();
+        this.batch = game.getBatch();
+        this.camera = estado.camera();
+        this.viewport = estado.viewport();
+        this.nave = estado.nave();
+        this.enemigos = estado.enemigos();
     }
-
-    
-
     public void dibujaEncabezado() {
         CharSequence str = "Vidas: " + nave.getVidas() + "  Ronda: " + ronda;
         game.getFont().getData().setScale(2f);
@@ -89,24 +63,17 @@ public class PantallaJuego implements Screen {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         batch.begin();
         dibujaEncabezado();
+        List<NaveEnemiga> enemigosParaColision = Collections.unmodifiableList(enemigos);
         for (int i = 0; i < balas.size(); i++) {
             Bullet b = balas.get(i);
             b.update(paso);
-            if (b.esOrigenJugador()) {
-                for (int j = 0; j < enemigos.size(); j++) {
-                    NaveEnemiga enemigo = enemigos.get(j);
-                    if (b.checkCollision(enemigo)) {
-                        recursos.getSonidoExplosion().play();
-                        if (enemigo.recibirImpacto(1)) {
-                            score += enemigo.getPuntajeRecompensa();
-                            enemigos.remove(j);
-                            j--;
-                        }
-                        break;
-                    }
+            NaveEnemiga impactado = b.procesarColision(nave, enemigosParaColision);
+            if (impactado != null) {
+                recursos.getSonidoExplosion().play();
+                if (impactado.recibirImpacto(1)) {
+                    score += impactado.getPuntajeRecompensa();
+                    enemigos.remove(impactado);
                 }
-            } else {
-                nave.checkCollisionBalaEnemiga(b);
             }
             if (b.isDestroyed()) {
                 balas.remove(i);
@@ -114,7 +81,7 @@ public class PantallaJuego implements Screen {
             }
         }
         for (NaveEnemiga enemigo : enemigos) {
-            enemigo.update(paso, nave.getCentroX(), nave.getCentroY(), recursos.getTexturaBala(), balas);
+            balas.addAll(enemigo.update(paso, nave.getCentroX(), nave.getCentroY(), recursos.getTexturaBala()));
         }
         for (int i = 0; i < enemigos.size(); i++) {
             NaveEnemiga e1 = enemigos.get(i);
@@ -146,27 +113,17 @@ public class PantallaJuego implements Screen {
             return;
         }
         if (enemigos.isEmpty() && nave.getVidas() > 0) {
-            Screen ss =
-		    new PantallaJuegoBuilder(game)
-		        .ronda(ronda + 1)
-		        .vidas(nave.getVidas())
-		        .score(score)
-		        .velocidadEnemigos(
-		            velXEnemigos + 1,
-		            velYEnemigos + 1
-		        )
-		        .cantidadEnemigos(
-		            cantidadEnemigos + 2
-		        )
-		        .build();
+            Screen ss = DirectorRondas.avanzar(new PantallaJuegoBuilder(game), ronda,
+                nave.getVidas(), score, velXEnemigos, velYEnemigos, cantidadEnemigos);
             ss.resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
             game.setScreen(ss);
             dispose();
         }
     }
 
-    public boolean agregarBala(Bullet bb) {
-        return balas.add(bb);
+    @Override
+    public void agregarBala(Bullet bb) {
+        balas.add(bb);
     }
 
     @Override
