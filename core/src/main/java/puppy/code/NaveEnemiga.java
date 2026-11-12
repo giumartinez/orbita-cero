@@ -120,6 +120,11 @@ public abstract class NaveEnemiga implements Colisionable {
         spr.setPosition(x, y);
     }
 
+    public void rebotarContraJugador() {
+        xSpeed = -xSpeed;
+        ySpeed = -ySpeed;
+    }
+
     public void draw(SpriteBatch batch) {
         if (!estaDestruido()) {
             spr.draw(batch);

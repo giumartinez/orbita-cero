@@ -74,8 +74,7 @@ public class Nave4 implements Colisionable {
         if (!this.colisionaCon(enemigo) || !health.hit()) {
             return false;
         }
-        enemigo.setXSpeed(-enemigo.getXSpeed());
-        enemigo.setySpeed(-enemigo.getySpeed());
+        enemigo.rebotarContraJugador();
         sonidoHerido.play();
         return true;
     }

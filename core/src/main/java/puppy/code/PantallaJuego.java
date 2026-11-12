@@ -1,6 +1,8 @@
 package puppy.code;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Random;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
@@ -80,10 +82,11 @@ public class PantallaJuego implements Screen, ReceptorBalas {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         batch.begin();
         dibujaEncabezado();
+        List<NaveEnemiga> enemigosParaColision = Collections.unmodifiableList(enemigos);
         for (int i = 0; i < balas.size(); i++) {
             Bullet b = balas.get(i);
             b.update(paso);
-            NaveEnemiga impactado = b.procesarColision(nave, enemigos);
+            NaveEnemiga impactado = b.procesarColision(nave, enemigosParaColision);
             if (impactado != null) {
                 recursos.getSonidoExplosion().play();
                 if (impactado.recibirImpacto(1)) {
