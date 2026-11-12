@@ -85,6 +85,9 @@ public abstract class NaveEnemiga implements Colisionable {
     }
 
     public void checkCollision(NaveEnemiga otra) {
+        if (!colisionaCon(otra)) {
+            return;
+        }
         Rectangle a = this.getArea();
         Rectangle b = otra.getArea();
         Vector2 desplazamiento = ColisionAsteroides.desplazamiento(a, b);
