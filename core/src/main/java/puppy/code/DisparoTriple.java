@@ -47,11 +47,6 @@ public class DisparoTriple implements EstrategiaDisparo {
         return origenJugador ? new Bullet(x, y, vx, vy, textura) : new BalaEnemiga(x, y, vx, vy, textura);
     }
 
-    @Override
-    public String getNombreEstrategia() {
-        return "Triple";
-    }
-
     public float getAnguloDispersion() {
         return anguloDispersion;
     }

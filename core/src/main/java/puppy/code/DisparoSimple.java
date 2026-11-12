@@ -21,9 +21,4 @@ public class DisparoSimple implements EstrategiaDisparo {
         return disparos;
     }
 
-    @Override
-    public String getNombreEstrategia() {
-        return "Disparo Simple";
-    }
-    
 }
