@@ -1,8 +1,7 @@
 # Orbita Cero
 
-Orbita Cero es un videojuego 2D espacial en el que el jugador controla una nave, destruye asteroides y avanza por rondas.
+Orbita Cero es un videojuego 2D espacial en el que el jugador controla una nave, destruye enemigos y avanza por rondas.
 
-En desarrollo.
 
 ## Equipo
 
