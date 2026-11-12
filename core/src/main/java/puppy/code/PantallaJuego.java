@@ -31,39 +31,20 @@ public class PantallaJuego implements Screen, ReceptorBalas {
     private ArrayList<NaveEnemiga> enemigos = new ArrayList<>();
     private ArrayList<Bullet> balas = new ArrayList<>();
 
-    public PantallaJuego(SpaceNavigation game, int ronda, int vidas, int score, int velXEnemigos, int velYEnemigos, int cantidadEnemigos, FabricaEnemigos fabricaEnemigos) {
-    
-        this.game = game;
-        this.ronda = ronda;
-        this.score = score;
-        
-   		this.velXEnemigos = velXEnemigos;
-		this.velYEnemigos = velYEnemigos;
-		this.cantidadEnemigos = cantidadEnemigos;
-		
-		recursos = GestorRecursos.getInstancia();
-		
-        batch = game.getBatch();
-        camera = new OrthographicCamera();
-        viewport = new FitViewport(AreaJuego.ANCHO, AreaJuego.ALTO, camera);
-        viewport.update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
-        
-        
-
-        nave = new Nave4(400 - 22,30,recursos.getTexturaNave(),recursos.getSonidoHerido(),recursos.getTexturaBala(),recursos.getSonidoDisparo(),vidas,new ControlesTecladoNave(viewport), ronda >= 3 ? new DisparoTriple() : new DisparoSimple());
-        
-        Random r = new Random();
-        for (int i = 0; i < cantidadEnemigos; i++) {
-            int posX = r.nextInt(AreaJuego.ANCHO - 60);
-            int posY = 160 + r.nextInt(AreaJuego.ALTO - 220);
-            int velX = velXEnemigos + r.nextInt(3);
-            int velY = velYEnemigos + r.nextInt(3);
-            enemigos.add(fabricaEnemigos.crear(i, posX, posY, velX, velY));
-        }
+    PantallaJuego(RondaConstruida estado) {
+        this.game = java.util.Objects.requireNonNull(estado).game();
+        this.ronda = estado.ronda();
+        this.score = estado.score();
+        this.velXEnemigos = estado.velXEnemigos();
+        this.velYEnemigos = estado.velYEnemigos();
+        this.cantidadEnemigos = estado.cantidadEnemigos();
+        this.recursos = estado.recursos();
+        this.batch = game.getBatch();
+        this.camera = estado.camera();
+        this.viewport = estado.viewport();
+        this.nave = estado.nave();
+        this.enemigos = estado.enemigos();
     }
-
-    
-
     public void dibujaEncabezado() {
         CharSequence str = "Vidas: " + nave.getVidas() + "  Ronda: " + ronda;
         game.getFont().getData().setScale(2f);
@@ -132,19 +113,8 @@ public class PantallaJuego implements Screen, ReceptorBalas {
             return;
         }
         if (enemigos.isEmpty() && nave.getVidas() > 0) {
-            Screen ss =
-		    new PantallaJuegoBuilder(game)
-		        .ronda(ronda + 1)
-		        .vidas(nave.getVidas())
-		        .score(score)
-		        .velocidadEnemigos(
-		            velXEnemigos + 1,
-		            velYEnemigos + 1
-		        )
-		        .cantidadEnemigos(
-		            cantidadEnemigos + 2
-		        )
-		        .build();
+            Screen ss = DirectorRondas.avanzar(new PantallaJuegoBuilder(game), ronda,
+                nave.getVidas(), score, velXEnemigos, velYEnemigos, cantidadEnemigos);
             ss.resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
             game.setScreen(ss);
             dispose();
