@@ -27,7 +27,8 @@ public class PantallaGameOver implements Screen {
 		game.getBatch().setProjectionMatrix(camera.combined);
 
 		game.getBatch().begin();
-		game.getFont().draw(game.getBatch(), "Game Over !!! ", 120, 400,400,1,true);
+		game.getFont().draw(game.getBatch(), "La guardia de Orbita Cero ha terminado.", 100, 450);
+		game.getFont().draw(game.getBatch(), "El corredor espera una nueva defensa.", 100, 400);
 		game.getFont().draw(game.getBatch(), "Pincha en cualquier lado para reiniciar ...", 100, 300);
 	
 		game.getBatch().end();

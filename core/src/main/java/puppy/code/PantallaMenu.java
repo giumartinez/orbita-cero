@@ -27,7 +27,9 @@ public class PantallaMenu implements Screen {
 		game.getBatch().setProjectionMatrix(camera.combined);
 
 		game.getBatch().begin();
-		game.getFont().draw(game.getBatch(), "Bienvenido a Orbita Cero", 140, 400);
+		game.getFont().draw(game.getBatch(), "Orbita Cero: ultima guardia del corredor", 100, 470);
+		game.getFont().draw(game.getBatch(), "La ruta de evacuacion sigue abierta mientras resistas.", 100, 410);
+		game.getFont().draw(game.getBatch(), "Despeja cada oleada enemiga para mantenerla a salvo.", 100, 370);
 		game.getFont().draw(game.getBatch(), "WASD: mover   Mouse: apuntar   Clic izquierdo: disparar", 100, 330);
 		game.getFont().draw(game.getBatch(), "Haz clic o presiona cualquier tecla para comenzar ...", 100, 270);
 	
